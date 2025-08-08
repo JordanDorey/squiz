@@ -68,6 +68,7 @@ function squiz.open_buffers_window()
         col = 0,
         border = "single",
         anchor = "SW",
+        title = " squiz ",
     }
 
 

@@ -1,7 +1,3 @@
-vim.api.nvim_create_user_command("SayHello", function()
-    require("squiz").greet()
-end, {})
-
 vim.api.nvim_create_user_command("SquizOpen", function()
     require("squiz").open_buffers_window()
 end, {})
