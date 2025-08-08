@@ -1,11 +1,14 @@
 local squiz = {}
 
 local squiz_is_open = false
+local win = nil
 
 function squiz.open_buffers_window()
     -- if already open do nothing
     if squiz_is_open then
-        print("OOPS")
+        if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, true)  -- close floating window
+        end
         return
     end
 
@@ -13,14 +16,20 @@ function squiz.open_buffers_window()
     local buffers = vim.api.nvim_list_bufs()
     local buffer_list = {}
     local file_list = {}
+    local current_buf = vim.api.nvim_get_current_buf()
 
     for _, bufnr in ipairs(buffers) do
         if vim.api.nvim_buf_is_loaded(bufnr) then
             local name = vim.api.nvim_buf_get_name(bufnr)
             -- Trim full path to file name only (optional)
-            local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or "[No Name]"
+            local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or ""
+            if bufnr == current_buf then
+                filename = "-> " .. filename
+            else
+                filename = "   " .. filename
+            end
 
-            if filename ~= "[No Name]" then
+            if filename ~= "   "  then
                 table.insert(buffer_list, bufnr)
                 table.insert(file_list, filename)
             end
@@ -28,7 +37,6 @@ function squiz.open_buffers_window()
     end
 
     if #buffer_list == 0 then
-        print(#buffer_list)
         return
     end
 
@@ -58,12 +66,14 @@ function squiz.open_buffers_window()
         height = height,
         row = vim.o.lines - height,
         col = 0,
-        border = "double",
-        anchor = "SW"
+        border = "single",
+        anchor = "SW",
     }
 
+
     -- Open the window and return window handle if needed
-    local win = vim.api.nvim_open_win(buf, true, opts)
+    win = vim.api.nvim_open_win(buf, true, opts)
+    vim.api.nvim_set_option_value("cursorline", true, { win = win })
 
     vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", "", {
         nowait = true,
@@ -85,7 +95,7 @@ function squiz.open_buffers_window()
         end,
     })
 
-    vim.api.nvim_buf_set_keymap(buf, "n", "<CR>", "", {
+    vim.api.nvim_buf_set_keymap(buf, "n", "s", "", {
         nowait = true,
         noremap = true,
         silent = true,
@@ -101,8 +111,7 @@ function squiz.open_buffers_window()
                 vim.api.nvim_win_close(win, true)  -- close floating window
             end
 
-            vim.api.nvim_win_set_buf(main_win, target_bufnr)
-
+            vim.cmd("vsplit | buffer " .. target_bufnr)
         end,
     })
 end
