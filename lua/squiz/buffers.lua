@@ -1,6 +1,5 @@
 local Buffers = {}
 
-
 function Buffers.get_buffers()
     local buffer_list = {}
     local file_list = {}
