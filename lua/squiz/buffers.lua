@@ -1,7 +1,9 @@
-local Buffers = {}
+local M = {}
 
-function Buffers.get_buffers()
+
+function M.get_buffers()
     local buffer_list = {}
+
     local file_list = {}
     local current_buf = vim.api.nvim_get_current_buf()
     local buffers = vim.api.nvim_list_bufs()
@@ -9,21 +11,29 @@ function Buffers.get_buffers()
     for _, bufnr in ipairs(buffers) do
         if vim.api.nvim_buf_is_loaded(bufnr) then
             local name = vim.api.nvim_buf_get_name(bufnr)
-            -- Trim full path to file name only (optional)
             local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or ""
+            local is_modified = vim.api.nvim_get_option_value('modified', { buf = bufnr })
+            local prefix = ""
+
             if bufnr == current_buf then
-                filename = "-> " .. filename
+                prefix = " -> "
             else
-                filename = "   " .. filename
+                prefix = "    "
             end
 
-            if filename ~= "   "  then
+            if is_modified then
+                prefix = prefix .. "~    "
+            else
+                prefix = prefix .. "     "
+            end
+
+            if filename ~= ""  then
                 table.insert(buffer_list, bufnr)
-                table.insert(file_list, filename)
+                table.insert(file_list, prefix .. filename)
             end
         end
     end
     return buffer_list, file_list
 end
 
-return Buffers
+return M
