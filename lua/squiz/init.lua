@@ -1,7 +1,12 @@
+local buf_help = require("squiz.buffers")
+
 local squiz = {}
 
 local squiz_is_open = false
 local win = nil
+local buf = nil
+local buffer_list = {}
+local file_list = {}
 
 function squiz.open_buffers_window()
     -- if already open do nothing
@@ -13,28 +18,7 @@ function squiz.open_buffers_window()
     end
 
     -- Get the list of listed buffers (open editable buffers)
-    local buffers = vim.api.nvim_list_bufs()
-    local buffer_list = {}
-    local file_list = {}
-    local current_buf = vim.api.nvim_get_current_buf()
-
-    for _, bufnr in ipairs(buffers) do
-        if vim.api.nvim_buf_is_loaded(bufnr) then
-            local name = vim.api.nvim_buf_get_name(bufnr)
-            -- Trim full path to file name only (optional)
-            local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or ""
-            if bufnr == current_buf then
-                filename = "-> " .. filename
-            else
-                filename = "   " .. filename
-            end
-
-            if filename ~= "   "  then
-                table.insert(buffer_list, bufnr)
-                table.insert(file_list, filename)
-            end
-        end
-    end
+    buffer_list, file_list = buf_help.get_buffers()
 
     if #buffer_list == 0 then
         return
@@ -44,7 +28,7 @@ function squiz.open_buffers_window()
 
     -- Create a new scratch buffer for the floating window
     squiz_is_open = true
-    local buf = vim.api.nvim_create_buf(false, true)
+    buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
     vim.api.nvim_create_autocmd("BufWipeout", {
         buffer = buf,
@@ -64,10 +48,10 @@ function squiz.open_buffers_window()
         relative = "editor",
         width = width,
         height = height,
-        row = vim.o.lines - height,
+        row = 0,
         col = 0,
         border = "single",
-        anchor = "SW",
+        anchor = "NW",
         title = " squiz ",
     }
 
@@ -96,7 +80,7 @@ function squiz.open_buffers_window()
         end,
     })
 
-    vim.api.nvim_buf_set_keymap(buf, "n", "s", "", {
+    vim.api.nvim_buf_set_keymap(buf, "n", "S", "", {
         nowait = true,
         noremap = true,
         silent = true,
@@ -115,6 +99,33 @@ function squiz.open_buffers_window()
             vim.cmd("vsplit | buffer " .. target_bufnr)
         end,
     })
+
+    vim.api.nvim_buf_set_keymap(buf, "n", "dd", "", {
+        nowait = true,
+        noremap = true,
+        silent = false,
+        callback = function()
+            local cursor = vim.api.nvim_win_get_cursor(win)
+            local line = cursor[1]
+            local target_bufnr = buffer_list[line]
+            local target_file = string.sub(file_list[line], 4)
+
+            local is_modified = vim.api.nvim_buf_get_option(target_bufnr, 'modified')
+
+            if is_modified then
+                vim.notify("Buffer " .. target_file .. " has unsaved changes!", vim.log.levels.WARN)
+                return
+            end
+
+            table.remove(buffer_list, line)
+            table.remove(file_list, line)
+
+            vim.cmd("normal! dd")
+            vim.cmd("bd " .. target_bufnr)
+            print("Buffer number: ", target_bufnr)
+        end
+    })
+
 end
 
 return squiz
