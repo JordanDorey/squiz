@@ -7,6 +7,10 @@ function M.open(app)
         if vim.api.nvim_win_is_valid(app.window) then
             vim.api.nvim_win_close(app.window, true)  -- close floating window
         end
+        if vim.api.nvim_win_is_valid(app.preview_win) then
+            vim.api.nvim_win_close(app.preview_win, true)  -- close floating window
+        end
+
         return
     end
 
@@ -32,17 +36,21 @@ function M.open(app)
     -- Set the buffer lines to the list of buffer names
     vim.api.nvim_buf_set_lines(app.buffer, 0, -1, false, app.file_list)
 
+    for line_num = 0, #app.file_list - 1 do
+        vim.api.nvim_buf_add_highlight(app.buffer, 0, "Selected", line_num, 0, 3)
+        vim.api.nvim_buf_add_highlight(app.buffer, 0, "Modified", line_num, 4, 5)
+    end
+
     -- Window configuration: centered floating window
-    local width = 80
     local height = math.min(#app.file_list, 15)  -- limit height for many buffers
     local opts = {
         style = "minimal",
         relative = "editor",
-        width = width,
+        width = app.opts.width,
         height = height,
         row = 0,
         col = 0,
-        border = "single",
+        border = app.opts.border,
         anchor = "NW",
         title = "    M    File Name    ",
     }
