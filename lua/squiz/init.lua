@@ -13,7 +13,8 @@ M.app = {
 
 M.opts = {
     width = 50,
-    border = "rounded"
+    border = "rounded",
+    position = "center",
 }
 
 function M.setup(opts)

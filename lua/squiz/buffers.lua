@@ -1,6 +1,5 @@
 local M = {}
 
-
 function M.get_buffers()
     local buffer_list = {}
 

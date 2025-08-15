@@ -4,10 +4,10 @@ local M = {}
 function M.open(app)
     -- if already open do nothing
     if app.is_open then
-        if vim.api.nvim_win_is_valid(app.window) then
+        if app.window and vim.api.nvim_win_is_valid(app.window) then
             vim.api.nvim_win_close(app.window, true)  -- close floating window
         end
-        if vim.api.nvim_win_is_valid(app.preview_win) then
+        if app.preview_win and vim.api.nvim_win_is_valid(app.preview_win) then
             vim.api.nvim_win_close(app.preview_win, true)  -- close floating window
         end
 
@@ -43,13 +43,14 @@ function M.open(app)
 
     -- Window configuration: centered floating window
     local height = math.min(#app.file_list, 15)  -- limit height for many buffers
+    local row, col = require('squiz.utils').positionWindow(app.opts.position, app.opts.width, height)
     local opts = {
         style = "minimal",
         relative = "editor",
         width = app.opts.width,
         height = height,
-        row = 0,
-        col = 0,
+        row = row,
+        col = col,
         border = app.opts.border,
         anchor = "NW",
         title = "    M    File Name    ",
