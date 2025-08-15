@@ -1,5 +1,4 @@
 vim.api.nvim_create_user_command("SquizOpen", function()
-
      require("squiz").open()
 end, {})
 

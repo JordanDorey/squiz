@@ -35,6 +35,7 @@ function M.open(app)
 
     -- Set the buffer lines to the list of buffer names
     vim.api.nvim_buf_set_lines(app.buffer, 0, -1, false, app.file_list)
+    vim.api.nvim_set_option_value('modifiable', false, { buf = app.buffer })
 
     for line_num = 0, #app.file_list - 1 do
         vim.api.nvim_buf_add_highlight(app.buffer, 0, "Selected", line_num, 0, 3)
