@@ -100,6 +100,7 @@ local function preview(app)
             vim.api.nvim_win_set_buf(app.current_window, buf)
             vim.api.nvim_win_close(app.preview_win, true)
             vim.api.nvim_win_close(app.window, true)
+            app.preview_win = nil
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
 
