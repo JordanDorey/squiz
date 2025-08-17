@@ -2,12 +2,12 @@ local M = {}
 
 M.app = {
     is_open = false,
-    window = nil,
-    buffer = nil,
-    current_window = nil,
+    squiz_win = nil,
+    squiz_buf = nil,
+    current_win = nil,
+    preview_win = nil,
     buffer_list = {},
     file_list = {},
-    preview_win = nil,
     opts = nil,
 }
 

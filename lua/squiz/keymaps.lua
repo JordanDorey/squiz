@@ -1,37 +1,37 @@
 local M = {}
 
 local function open(app)
-    local cursor = vim.api.nvim_win_get_cursor(app.window)
+    local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
-    if vim.api.nvim_win_is_valid(app.current_window) then
-        vim.api.nvim_set_current_win(app.current_window)
+    if vim.api.nvim_win_is_valid(app.current_win) then
+        vim.api.nvim_set_current_win(app.current_win)
     end
 
-    if vim.api.nvim_win_is_valid(app.window) then
-        vim.api.nvim_win_close(app.window, true)  -- close floating window
+    if vim.api.nvim_win_is_valid(app.squiz_win) then
+        vim.api.nvim_win_close(app.squiz_win, true)  -- close floating window
     end
 
-    vim.api.nvim_win_set_buf(app.current_window, target_bufnr)
+    vim.api.nvim_win_set_buf(app.current_win, target_bufnr)
 end
 
 local function split(app)
-    local cursor = vim.api.nvim_win_get_cursor(app.window)
+    local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
-    if vim.api.nvim_win_is_valid(app.current_window) then
-        vim.api.nvim_set_current_win(app.current_window)
+    if vim.api.nvim_win_is_valid(app.current_win) then
+        vim.api.nvim_set_current_win(app.current_win)
     end
 
-    if vim.api.nvim_win_is_valid(app.window) then
-        vim.api.nvim_win_close(app.window, true)  -- close floating window
+    if vim.api.nvim_win_is_valid(app.squiz_win) then
+        vim.api.nvim_win_close(app.squiz_win, true)  -- close floating window
     end
 
     vim.cmd("vsplit | buffer " .. target_bufnr)
 end
 
 local function delete(app)
-    local cursor = vim.api.nvim_win_get_cursor(app.window)
+    local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
     local target_file = string.sub(app.file_list[line], 4)
@@ -43,22 +43,22 @@ local function delete(app)
         return
     end
 
-    if vim.api.nvim_win_get_buf(app.current_window) == target_bufnr then
-        vim.api.nvim_win_set_buf(app.current_window, 0)  -- 0 creates a new empty buffer
+    if vim.api.nvim_win_get_buf(app.current_win) == target_bufnr then
+        vim.api.nvim_win_set_buf(app.current_win, 0)  -- 0 creates a new empty buffer
     end
 
     table.remove(app.buffer_list, line)
     table.remove(app.file_list, line)
 
-    vim.api.nvim_set_option_value('modifiable', true, { buf = app.buffer })
+    vim.api.nvim_set_option_value('modifiable', true, { buf = app.squiz_buf })
     vim.cmd("normal! dd")
     vim.cmd("bd " .. target_bufnr)
-    vim.api.nvim_buf_set_lines(app.buffer, 0, -1, false, app.file_list)
-    vim.api.nvim_set_option_value('modifiable', false, { buf = app.buffer })
+    vim.api.nvim_buf_set_lines(app.squiz_buf, 0, -1, false, app.file_list)
+    vim.api.nvim_set_option_value('modifiable', false, { buf = app.squiz_buf })
 end
 
 local function preview(app)
-    local cursor = vim.api.nvim_win_get_cursor(app.window)
+    local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = target_bufnr })
@@ -97,9 +97,11 @@ local function preview(app)
     vim.keymap.set('n', '<CR>', function()
         if app.preview_win then
             local buf = vim.api.nvim_win_get_buf(app.preview_win)
-            vim.api.nvim_win_set_buf(app.current_window, buf)
+            vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
+
+            vim.api.nvim_win_set_buf(app.current_win, buf)
             vim.api.nvim_win_close(app.preview_win, true)
-            vim.api.nvim_win_close(app.window, true)
+            vim.api.nvim_win_close(app.squiz_win, true)
             app.preview_win = nil
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
@@ -109,16 +111,16 @@ local function preview(app)
             local buf = vim.api.nvim_win_get_buf(app.preview_win)
             vim.cmd("vsplit | buffer " .. buf)
             vim.api.nvim_win_close(app.preview_win, true)
-            vim.api.nvim_win_close(app.window, true)
+            vim.api.nvim_win_close(app.squiz_win, true)
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
 end
 
 function M.keymaps(app)
-    vim.api.nvim_buf_set_keymap(app.buffer, "n", "<CR>", "", { callback = function() open(app) end })
-    vim.api.nvim_buf_set_keymap(app.buffer, "n", "S", "", { callback = function() split(app) end })
-    vim.api.nvim_buf_set_keymap(app.buffer, "n", "dd", "", { callback = function() delete(app) end })
-    vim.api.nvim_buf_set_keymap(app.buffer, "n", "<TAB>", "", { callback = function() preview(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<CR>", "", { callback = function() open(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })
 end
 
 return M
