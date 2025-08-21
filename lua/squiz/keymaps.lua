@@ -9,7 +9,7 @@ local function open(app)
     end
 
     if vim.api.nvim_win_is_valid(app.squiz_win) then
-        vim.api.nvim_win_close(app.squiz_win, true)  -- close floating window
+        vim.api.nvim_win_close(app.squiz_win, true)
     end
 
     vim.api.nvim_win_set_buf(app.current_win, target_bufnr)
@@ -24,7 +24,7 @@ local function split(app)
     end
 
     if vim.api.nvim_win_is_valid(app.squiz_win) then
-        vim.api.nvim_win_close(app.squiz_win, true)  -- close floating window
+        vim.api.nvim_win_close(app.squiz_win, true)
     end
 
     vim.cmd("vsplit | buffer " .. target_bufnr)
@@ -44,7 +44,7 @@ local function delete(app)
     end
 
     if vim.api.nvim_win_get_buf(app.current_win) == target_bufnr then
-        vim.api.nvim_win_set_buf(app.current_win, 0)  -- 0 creates a new empty buffer
+        vim.api.nvim_win_set_buf(app.current_win, 0)
     end
 
     table.remove(app.buffer_list, line)

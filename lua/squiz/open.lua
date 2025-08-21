@@ -5,24 +5,21 @@ function M.open(app)
     -- if already open do nothing
     if app.is_open then
         if app.squiz_win and vim.api.nvim_win_is_valid(app.squiz_win) then
-            vim.api.nvim_win_close(app.squiz_win, true)  -- close floating window
+            vim.api.nvim_win_close(app.squiz_win, true)
         end
         if app.preview_win and vim.api.nvim_win_is_valid(app.preview_win) then
-            vim.api.nvim_win_close(app.preview_win, true)  -- close floating window
+            vim.api.nvim_win_close(app.preview_win, true)
         end
-
         return
     end
 
-    -- Get the list of listed buffers (open editable buffers)
-    app.buffer_list, app.file_list = require('squiz.buffers').get_buffers()
+    require('squiz.buffers').get_buffers(app)
     if #app.file_list == 0 then
         return
     end
 
     app.current_win = vim.api.nvim_get_current_win()
 
-    -- Create a new scratch buffer for the floating window
     app.is_open = true
     app.squiz_buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = app.squiz_buf })
@@ -37,9 +34,11 @@ function M.open(app)
     vim.api.nvim_buf_set_lines(app.squiz_buf, 0, -1, false, app.file_list)
     vim.api.nvim_set_option_value('modifiable', false, { buf = app.squiz_buf })
 
+    local ns_id = vim.api.nvim_create_namespace("squiz")
     for line_num = 0, #app.file_list - 1 do
-        vim.api.nvim_buf_add_highlight(app.squiz_buf, 0, "Selected", line_num, 0, 3)
-        vim.api.nvim_buf_add_highlight(app.squiz_buf, 0, "Modified", line_num, 4, 5)
+        vim.api.nvim_buf_set_extmark(app.squiz_buf, ns_id, line_num, 0, { end_col = 3, hl_group = "Selected" })
+        vim.api.nvim_buf_set_extmark(app.squiz_buf, ns_id, line_num, 4, { end_col = 5, hl_group = "Modified" })
+        vim.api.nvim_buf_set_extmark(app.squiz_buf, ns_id, line_num, 9, { end_col = 12, hl_group = app.icon_colour_list[line_num+1] })
     end
 
     -- Window configuration: centered floating window
