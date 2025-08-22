@@ -10,6 +10,7 @@ local function open(app)
 
     if vim.api.nvim_win_is_valid(app.squiz_win) then
         vim.api.nvim_win_close(app.squiz_win, true)
+        app.squiz_win = nil
     end
 
     vim.api.nvim_win_set_buf(app.current_win, target_bufnr)
@@ -25,6 +26,7 @@ local function split(app)
 
     if vim.api.nvim_win_is_valid(app.squiz_win) then
         vim.api.nvim_win_close(app.squiz_win, true)
+        app.squiz_win = nil
     end
 
     vim.cmd("vsplit | buffer " .. target_bufnr)
@@ -34,7 +36,7 @@ local function delete(app)
     local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
-    local target_file = string.sub(app.file_list[line], 4)
+    local target_file = string.sub(app.line_list[line], 4)
 
     -- check buffer is not modified
     local is_modified = vim.api.nvim_get_option_value('modified', { buf = target_bufnr })
@@ -48,19 +50,21 @@ local function delete(app)
     end
 
     table.remove(app.buffer_list, line)
-    table.remove(app.file_list, line)
+    table.remove(app.line_list, line)
+    table.remove(app.file_name_list, line)
+    table.remove(app.icon_colour_list, line)
 
     vim.api.nvim_set_option_value('modifiable', true, { buf = app.squiz_buf })
     vim.cmd("normal! dd")
     vim.cmd("bd " .. target_bufnr)
-    vim.api.nvim_buf_set_lines(app.squiz_buf, 0, -1, false, app.file_list)
-    vim.api.nvim_set_option_value('modifiable', false, { buf = app.squiz_buf })
+    require('squiz.window').update_squiz_win(app)
 end
 
 local function preview(app)
     local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
+    local file_name = app.file_name_list[line]
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = target_bufnr })
 
     -- create a new buffer for preview
@@ -69,10 +73,11 @@ local function preview(app)
 
     if app.preview_win and  vim.api.nvim_win_is_valid(app.preview_win) then
         vim.api.nvim_win_close(app.preview_win, true)
+        app.preview_win = nil
         return
     end
 
-    local row, col = require('squiz.utils').positionWindow(app.opts.position, 120, 30)
+    local row, col = require('squiz.window').positionWindow(app.opts.position, 120, 30)
     app.preview_win = vim.api.nvim_open_win(target_bufnr, true, {
         relative = "editor",
         width = 120,
@@ -80,6 +85,7 @@ local function preview(app)
         row = row,
         col = col,
         border = "rounded",
+        title = " " .. file_name .. " ",
     })
 
     vim.api.nvim_buf_attach(target_bufnr, false, {
@@ -91,6 +97,7 @@ local function preview(app)
     vim.keymap.set('n', '<TAB>', function()
         if app.preview_win then
             vim.api.nvim_win_close(app.preview_win, true)
+            app.preview_win = nil
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
 
@@ -103,6 +110,7 @@ local function preview(app)
             vim.api.nvim_win_close(app.preview_win, true)
             vim.api.nvim_win_close(app.squiz_win, true)
             app.preview_win = nil
+            app.squiz_win = nil
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
 
@@ -112,6 +120,8 @@ local function preview(app)
             vim.cmd("vsplit | buffer " .. buf)
             vim.api.nvim_win_close(app.preview_win, true)
             vim.api.nvim_win_close(app.squiz_win, true)
+            app.preview_win = nil
+            app.squiz_win = nil
         end
     end, { buffer = target_bufnr, silent = true, noremap = true })
 end

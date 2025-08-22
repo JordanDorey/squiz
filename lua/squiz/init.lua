@@ -1,13 +1,13 @@
 local M = {}
 
 M.app = {
-    is_open = false,
     squiz_win = nil,
     squiz_buf = nil,
     current_win = nil,
     preview_win = nil,
     buffer_list = {},
-    file_list = {},
+    line_list = {},
+    file_name_list = {},
     icon_colour_list = {},
     opts = nil,
     devicons = require('nvim-web-devicons')

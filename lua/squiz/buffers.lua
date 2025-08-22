@@ -1,11 +1,11 @@
 local M = {}
 
-
 --- Populates list of buffer_list, file_list and icon_colours_list
 ---@param app table
 function M.get_buffers(app)
     local buffer_list = {}
-    local file_list = {}
+    local line_list = {}
+    local file_name_list = {}
     local icon_colour_list = {}
 
     local current_buf = vim.api.nvim_get_current_buf()
@@ -36,14 +36,16 @@ function M.get_buffers(app)
 
             if filename ~= ""  then
                 table.insert(buffer_list, bufnr)
-                table.insert(file_list, prefix .. filename)
+                table.insert(line_list, prefix .. filename)
+                table.insert(file_name_list, icon .. " " .. filename)
                 table.insert(icon_colour_list, colour)
             end
         end
     end
 
     app.buffer_list = buffer_list
-    app.file_list = file_list
+    app.line_list = line_list
+    app.file_name_list = file_name_list
     app.icon_colour_list = icon_colour_list
 end
 
