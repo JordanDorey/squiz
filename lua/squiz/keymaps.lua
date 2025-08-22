@@ -67,15 +67,15 @@ local function preview(app)
     local file_name = app.file_name_list[line]
     local filetype = vim.api.nvim_get_option_value('filetype', { buf = target_bufnr })
 
-    -- create a new buffer for preview
-    vim.api.nvim_set_option_value('filetype', filetype, { buf = target_bufnr })
-    vim.api.nvim_set_option_value('modifiable', false, { buf = target_bufnr })
-
-    if app.preview_win and  vim.api.nvim_win_is_valid(app.preview_win) then
+    if app.preview_win and vim.api.nvim_win_is_valid(app.preview_win) then
         vim.api.nvim_win_close(app.preview_win, true)
+        vim.api.nvim_set_option_value('modifiable', true, { buf = target_bufnr })
         app.preview_win = nil
         return
     end
+
+    vim.api.nvim_set_option_value('filetype', filetype, { buf = target_bufnr })
+    vim.api.nvim_set_option_value('modifiable', false, { buf = target_bufnr })
 
     local row, col = require('squiz.window').positionWindow(app.opts.position, 120, 30)
     app.preview_win = vim.api.nvim_open_win(target_bufnr, true, {
@@ -96,6 +96,8 @@ local function preview(app)
 
     vim.keymap.set('n', '<TAB>', function()
         if app.preview_win then
+            local buf = vim.api.nvim_win_get_buf(app.preview_win)
+            vim.api.nvim_set_option_value('modifiable', true, { buf = buf })
             vim.api.nvim_win_close(app.preview_win, true)
             app.preview_win = nil
         end

@@ -1,6 +1,5 @@
 # Squiz - buffer manager
 
-
 This is a simple plugin to manage open buffers. The term "squiz" is a australian slang term used to quickly take a look i.e. "take a squiz at this". 
 
 ---
