@@ -36,6 +36,13 @@ local function split(app)
     vim.cmd("vsplit | buffer " .. target_bufnr)
 end
 
+local function close(app)
+    if vim.api.nvim_win_is_valid(app.squiz_win) then
+        vim.api.nvim_win_close(app.squiz_win, true)
+        app.squiz_win = nil
+    end
+end
+
 local function delete(app)
     local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
@@ -162,7 +169,7 @@ function M.keymaps(app)
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })
-    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<ESC>", "", { callback = function() vim.api.nvim_win_close(app.squiz_win, true) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<ESC>", "", { callback = function() close(app) end })
     setup_autocmds(app)
 end
 
