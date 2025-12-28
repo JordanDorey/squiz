@@ -75,6 +75,14 @@ function M.update_squiz_win(app)
 
     app.squiz_win = vim.api.nvim_open_win(app.squiz_buf, true, opts)
     vim.api.nvim_set_option_value("cursorline", true, { win = app.squiz_win })
+
+    local current_main_buf = vim.api.nvim_win_get_buf(app.current_win)
+    for i, bufnr in ipairs(app.buffer_list) do
+        if bufnr == current_main_buf then
+            vim.api.nvim_win_set_cursor(app.squiz_win, { i, 0 })
+            break
+        end
+    end
 end
 
 return M

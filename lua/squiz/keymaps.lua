@@ -1,6 +1,10 @@
 local M = {}
 
 local function open(app)
+    if next(app.buffer_list) == nil then
+        return
+    end
+
     local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
     local line = cursor[1]
     local target_bufnr = app.buffer_list[line]
@@ -56,7 +60,7 @@ local function delete(app)
 
     vim.api.nvim_set_option_value('modifiable', true, { buf = app.squiz_buf })
     vim.cmd("normal! dd")
-    vim.cmd("bd " .. target_bufnr)
+    vim.cmd("bd! " .. target_bufnr)
     require('squiz.window').update_squiz_win(app)
 end
 
@@ -128,11 +132,37 @@ local function preview(app)
     end, { buffer = target_bufnr, silent = true, noremap = true })
 end
 
+local function setup_autocmds(app)
+    local group = vim.api.nvim_create_augroup("SquizPreview", { clear = true })
+
+    vim.api.nvim_create_autocmd("CursorMoved", {
+        group = group,
+        buffer = app.squiz_buf, -- Only trigger inside the squiz list
+        callback = function()
+            local line = vim.api.nvim_win_get_cursor(0)[1]
+            local target_bufnr = app.buffer_list[line]
+
+            if target_bufnr and
+                vim.api.nvim_win_is_valid(app.current_win) and
+                vim.api.nvim_win_get_buf(app.current_win) ~= target_bufnr then
+
+                vim.api.nvim_win_set_buf(app.current_win, target_bufnr)
+            end
+        end,
+    })
+end
+
+
 function M.keymaps(app)
+    if not app.squiz_win or not vim.api.nvim_win_is_valid(app.squiz_win) then
+        return
+    end
+
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<CR>", "", { callback = function() open(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })
+    setup_autocmds(app)
 end
 
 return M
