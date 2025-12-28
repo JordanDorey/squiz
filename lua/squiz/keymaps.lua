@@ -162,6 +162,7 @@ function M.keymaps(app)
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<ESC>", "", { callback = function() vim.api.nvim_win_close(app.squiz_win, true) end })
     setup_autocmds(app)
 end
 
