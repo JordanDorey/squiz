@@ -1,0 +1,46 @@
+*squiz.txt*	For Neovim 0.10+ and Squiz
+
+==============================================================================
+CONTENTS                                                      *squiz-contents*
+
+1. Intro........................................................|squiz-intro|
+2. Configuration................................................|squiz-config|
+3. Commands...................................................|squiz-commands|
+
+==============================================================================
+1. INTRO                                                       *squiz-intro*
+
+Squiz is a fast buffer and file navigation tool for Neovim. It provides
+a clean interface for jumping between your open buffers and recently
+accessed files with icon support.
+
+==============================================================================
+2. CONFIGURATION                                              *squiz-config*
+
+To configure Squiz, call the setup function in your init.lua:
+>lua
+    require('squiz').setup({
+        width = 50,           -- Width of the floating window
+        border = "rounded",   -- Border style
+        position = "center",  -- Window position
+    })
+<
+
+                                                               *squiz-options*
+width (number) ~
+    Default: 50
+    The width of the floating window in characters.
+
+border (string) ~
+    Default: "rounded"
+    The border style. Options: "none", "single", "double", "rounded", "solid",
+    or "shadow".
+
+==============================================================================
+3. COMMANDS                                                 *squiz-commands*
+
+:SquizOpen                                                       *:SquizOpen*
+    Opens the Squiz navigation interface.
+
+==============================================================================
+vim:tw=78:ts=8:sw=4:sts=4:et:ft=help:norl:
