@@ -4,6 +4,11 @@ This is a simple plugin to manage open buffers. The term "squiz" is a australian
 
 ---
 
+## Demonstartion
+![Demo of squiz](https://github.com/JordanDorey/squiz/media/squiz.gif
+
+---
+
 ## 🚀 Features
 
 -   Open small window with the currently open buffers with "->" denoting the currently focused buffer
