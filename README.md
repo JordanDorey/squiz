@@ -6,6 +6,7 @@ This is a simple plugin to manage open buffers. The term "squiz" is a australian
 
 ## Demonstartion
 ![Demo of squiz](https://github.com/JordanDorey/squiz/blob/main/media/squiz.gif)
+
 ---
 
 ## 🚀 Features
