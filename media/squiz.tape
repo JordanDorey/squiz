@@ -42,3 +42,7 @@ Type " s" Sleep 400ms
 Down
 Sleep 400ms
 Type "dd" Sleep 2s
+Up
+Sleep 400ms
+Enter
+Sleep 2s
