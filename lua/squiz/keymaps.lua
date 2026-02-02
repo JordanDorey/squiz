@@ -1,25 +1,5 @@
 local M = {}
 
-local function open(app)
-    if next(app.buffer_list) == nil then
-        return
-    end
-
-    local cursor = vim.api.nvim_win_get_cursor(app.squiz_win)
-    local line = cursor[1]
-    local target_bufnr = app.buffer_list[line]
-    if vim.api.nvim_win_is_valid(app.current_win) then
-        vim.api.nvim_set_current_win(app.current_win)
-    end
-
-    if vim.api.nvim_win_is_valid(app.squiz_win) then
-        vim.api.nvim_win_close(app.squiz_win, true)
-        app.squiz_win = nil
-    end
-
-    vim.api.nvim_win_set_buf(app.current_win, target_bufnr)
-end
-
 local function close(app)
     if vim.api.nvim_win_is_valid(app.squiz_win) then
         vim.api.nvim_win_close(app.squiz_win, true)
@@ -73,6 +53,16 @@ local function setup_autocmds(app)
             end
         end,
     })
+
+    vim.api.nvim_create_autocmd("WinLeave", {
+        buffer = app.squiz_buf, 
+        callback = function()
+            if app.squiz_win and vim.api.nvim_win_is_valid(app.squiz_win) then
+                vim.api.nvim_win_close(app.squiz_win, true)
+                app.squiz_win = nil
+            end
+        end,
+    })
 end
 
 
@@ -81,7 +71,7 @@ function M.keymaps(app)
         return
     end
 
-    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<CR>", "", { callback = function() open(app) end })
+    vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<CR>", "", { callback = function() close(app) end })
     -- vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
     -- vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })

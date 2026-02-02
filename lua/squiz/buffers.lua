@@ -8,10 +8,10 @@ function M.get_buffers(app)
     local file_name_list = {}
     local icon_colour_list = {}
 
-    local current_buf = vim.api.nvim_get_current_buf()
-    local buffers = vim.api.nvim_list_bufs()
+    file_list, current_buf = M.filter_for_file_buffers()
 
-    for _, bufnr in ipairs(buffers) do
+
+    for _, bufnr in ipairs(file_list) do
         if vim.api.nvim_buf_is_loaded(bufnr) then
             local name = vim.api.nvim_buf_get_name(bufnr)
             local filename = name ~= "" and vim.fn.fnamemodify(name, ":t") or ""
@@ -49,4 +49,26 @@ function M.get_buffers(app)
     app.icon_colour_list = icon_colour_list
 end
 
+
+function M.filter_for_file_buffers()
+    local file_list = {}
+    local cur_buf = nil
+    local current_buf = vim.api.nvim_get_current_buf()
+    local buffers = vim.api.nvim_list_bufs()
+
+    for _, bufnr in ipairs(buffers) do
+        local isFile = vim.bo[bufnr].buftype == ""
+        if isFile then
+           table.insert(file_list, bufnr)
+
+            if bufnr == current_buf then
+                cur_buf = bufnr
+            end
+        end
+    end
+
+    return file_list, cur_buf
+end
+
 return M
+

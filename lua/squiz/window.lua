@@ -54,9 +54,9 @@ function M.update_squiz_win(app)
     end
 
     local height = math.min(#app.line_list, 15)
-    if height == 0 then height = 1 end
-    if app.squiz_win then
-        vim.api.nvim_win_set_config(app.squiz_win, { height = height })
+    if height == 0 then
+        vim.api.nvim_win_close(app.squiz_win, true)
+        app.squiz_win = nil
         return
     end
 
