@@ -24,10 +24,7 @@ local function delete(app)
         vim.api.nvim_win_set_buf(app.current_win, 0)
     end
 
-    table.remove(app.buffer_list, line)
-    table.remove(app.line_list, line)
-    table.remove(app.file_name_list, line)
-    table.remove(app.icon_colour_list, line)
+    app:remove_from_lists(line)
 
     vim.api.nvim_set_option_value('modifiable', true, { buf = app.squiz_buf })
     vim.cmd("normal! dd")
@@ -72,9 +69,7 @@ function M.keymaps(app)
     end
 
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<CR>", "", { callback = function() close(app) end })
-    -- vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "S", "", { callback = function() split(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "dd", "", { callback = function() delete(app) end })
-    -- vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<TAB>", "", { callback = function() preview(app) end })
     vim.api.nvim_buf_set_keymap(app.squiz_buf, "n", "<ESC>", "", { callback = function() close(app) end })
     setup_autocmds(app)
 end

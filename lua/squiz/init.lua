@@ -13,6 +13,14 @@ M.app = {
     devicons = require('nvim-web-devicons')
 }
 
+-- removes the line from the tables
+function M.app:remove_from_lists(line)
+    table.remove(M.app.buffer_list, line)
+    table.remove(M.app.line_list, line)
+    table.remove(M.app.file_name_list, line)
+    table.remove(M.app.icon_colour_list, line)
+end
+
 M.opts = {
     width = 50,
     border = "rounded",
